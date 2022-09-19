@@ -5,24 +5,70 @@
 int n=0;
 
 struct Produit{
-    char*nom;
+    int code;
+    char nom[100];
     int prix;
     int TTC;
 };
 
 // ajouter un nouveau produit saisie par l'utilisateur
-void ajouterUnProduit(struct Produit produit[]){
+void ajouterUnProduit(struct Produit produit[100]){
+    printf("ajouter le code de produit :\n");
+    scanf("%d",&produit[n].code);
     printf("ajouter le nom de produit :\n");
-    scanf("%s",produit[n].nom);
+    scanf("%s",&produit[n].nom);
     printf("ajouter le prix de produit:\n");
     scanf("%d",&produit[n].prix);
-    produit[n].TTC=produit[n].prix*0.15;
+    produit[n].TTC=produit[n].prix*0.15+produit[n].prix;
+    printf("le prix TTC est %d\n",produit[n].TTC);
     n++;
 }
 
+void afficherProduits(struct Produit produit[100]){
+ for(int i=0;i<n;i++){
+    printf("***********\n");
+    printf("produit numero %d :",i+1);
+    printf("nom:%d\n",produit[i].code);
+    printf("nom:%s\n",produit[i].nom);
+    printf("prix:%d\n",produit[i].prix);
+    printf("prix TTC:%d\n",produit[i].TTC);
+    printf("***********\n");
+    }
+}
+
+// cette fonction fait un tri par bull d'ordre alphabitique croissant
+
+void triProduitsAlphabetique(struct Produit produit[100]){
+    struct Produit p;
+      for(int i=0;i<n-1;i++){
+        for(int j=i+1;j<n;j++){
+        if(strcmp(produit[i].nom,produit[j].nom)>0){
+             p=produit[i];
+             produit[i]=produit[j];
+             produit[j]=p;
+        }
+       }
+      }
+   afficherProduits(produit);
+}
+
+// cette fonction fait un tri par bull l'ordre decroissant de prix
+void triProduitsPrix(struct Produit produit[100]){
+    struct Produit p;
+      for(int i=0;i<n-1;i++){
+        for(int j=i+1;j<n;j++){
+        if(produit[i].prix<produit[j].prix){
+             p=produit[i];
+             produit[i]=produit[j];
+             produit[j]=p;
+        }
+       }
+      }
+   afficherProduits(produit);
+}
 
 // fonction de display de menu 
-void Menu(struct Produit produit[]){
+void Menu(struct Produit produit[100]){
     int choix,nbr;
     do{ 
         printf("ajouter un produit entrer 1\n");
@@ -44,7 +90,6 @@ void Menu(struct Produit produit[]){
         case 1:
         // ajouter un seul produit 
         ajouterUnProduit(produit);
-        printf("run");
         break;
         case 2:
         // ajouter plusieur produit 
@@ -55,10 +100,10 @@ void Menu(struct Produit produit[]){
         }
         break;
         case 3:
-
+        triProduitsAlphabetique(produit);
         break;
         case 4:
-
+        triProduitsPrix(produit);
         break;
         case 5:
         break;
