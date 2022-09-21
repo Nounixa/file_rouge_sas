@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <stdbool.h>
 
-
-int n = 0, npa = 0;
+int n = 0,numeroJMY=0;
 
 struct Produit
 {
@@ -17,7 +17,12 @@ struct Produit
 
 struct HistoryAchat
 {
-    time_t time;
+    int jour;
+    int mois;
+    int annee;
+    int heur;
+    int minute;
+    int seconde;
     int quantite;
     int prixTotale;
     int nbrPro;
@@ -142,6 +147,7 @@ void triProduitsPrix(struct Produit produit[])
     afficherProduits(produit);
 }
 
+
 int rechercheQuantite(int quantite, struct Produit produit[])
 {
     printf("\t\t\t|code   |nom      |quantite    |prix");
@@ -150,7 +156,7 @@ int rechercheQuantite(int quantite, struct Produit produit[])
     {
         if (produit[i].quantite == quantite)
         {
-            printf("\t\t\t|%d    %s      %d        %d", produit[i].code, produit[i].nom, produit[i].quantite, produit[i].prix);
+            printf("\t\t\t|%d     %s       %d          %d", produit[i].code, produit[i].nom, produit[i].quantite, produit[i].prix);
             printf("\t\t\t______________________________________");
         }
     }
@@ -158,12 +164,13 @@ int rechercheQuantite(int quantite, struct Produit produit[])
 
 // acheter un produit
 
-void acheterProduit(struct Produit produit[], struct Stock *stock, int code)
+void acheterProduit(struct Produit produit[], struct Stock stock[], int code)
 {
     int quantite;
     int valide;
-    time_t timeV;
-    time(&timeV);
+    int npa;
+    time_t tt = time(NULL);
+    struct tm* dt = localtime(&tt);
     int i = recherche(code, produit);
     if (i == 0)
     {
@@ -185,14 +192,36 @@ void acheterProduit(struct Produit produit[], struct Stock *stock, int code)
                 printf("veuille entrer un nombre positive qui est different de 0\n");
                 }else{
                 if (produit[i - 1].quantite >= quantite)
-                {
-                    produit[i - 1].quantite -= quantite;
-                    stock->revenu += produit[i - 1].TTC * quantite;
-                    stock->historyAchat[npa].time = timeV;
-                    stock->historyAchat[npa].nbrPro = i - 1;
-                    stock->historyAchat[npa].quantite = quantite;
-                    stock->historyAchat[npa].prixTotale = produit[i - 1].TTC * quantite;
-                    npa++;
+                {   
+                     produit[i - 1].quantite -= quantite;
+                    if(stock[numeroJMY].historyAchat[npa-1].jour==dt->tm_mday&&stock[numeroJMY].historyAchat[npa-1].mois==dt->tm_mon+1&&stock[numeroJMY].historyAchat[npa-1].annee==dt->tm_year+1900){
+                    npa=stock[numeroJMY].nbrProduit;
+                    stock[numeroJMY].revenu += produit[i - 1].TTC * quantite;
+                    stock[numeroJMY].historyAchat[npa].jour = dt->tm_mday;
+                    stock[numeroJMY].historyAchat[npa].mois = dt->tm_mon+1;
+                    stock[numeroJMY].historyAchat[npa].annee = dt->tm_year+1900;
+                    stock[numeroJMY].historyAchat[npa].heur = dt->tm_hour;
+                    stock[numeroJMY].historyAchat[npa].minute = dt->tm_min;
+                    stock[numeroJMY].historyAchat[npa].seconde= dt->tm_sec;
+                    stock[numeroJMY].historyAchat[npa].nbrPro = i - 1;
+                    stock[numeroJMY].historyAchat[npa].quantite = quantite;
+                    stock[numeroJMY].historyAchat[npa].prixTotale = produit[i - 1].TTC * quantite;
+                    stock[numeroJMY].nbrProduit+=1;
+                    }else{
+                    numeroJMY++;
+                    npa=stock[numeroJMY].nbrProduit;
+                    stock[numeroJMY].revenu += produit[i - 1].TTC * quantite;
+                    stock[numeroJMY].historyAchat[npa].jour = dt->tm_mday;
+                    stock[numeroJMY].historyAchat[npa].mois = dt->tm_mon+1;
+                    stock[numeroJMY].historyAchat[npa].annee = dt->tm_year+1900;
+                    stock[numeroJMY].historyAchat[npa].heur = dt->tm_hour;
+                    stock[numeroJMY].historyAchat[npa].minute = dt->tm_min;
+                    stock[numeroJMY].historyAchat[npa].seconde= dt->tm_sec;
+                    stock[numeroJMY].historyAchat[npa].nbrPro = i - 1;
+                    stock[numeroJMY].historyAchat[npa].quantite = quantite;
+                    stock[numeroJMY].historyAchat[npa].prixTotale = produit[i - 1].TTC * quantite;
+                    stock[numeroJMY].nbrProduit+=1;
+                    }
                 }
                 else
                 {
@@ -213,16 +242,18 @@ void acheterProduit(struct Produit produit[], struct Stock *stock, int code)
 }
 
 //
-void affichageAchat(struct Stock *stock, struct Produit produit[])
+void affichageAchat(struct Stock stock[], struct Produit produit[])
 {
+    for(int k=0;k<numeroJMY;k++){
     printf("\t\t\t___________________________________________________________________________________\n");
     printf("\t\t\t||number |code   |nom               |prix    |quantite |totale prix|time d'achat              ||\n");
     printf("\t\t\t||_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ ||\n");
-    for (int j = 0; j < npa; j++)
+    for (int j = 0; j <stock[k].nbrProduit ; j++)
     {
-        int i = stock->historyAchat[j].nbrPro;
-        printf("\t\t\t||%d   %d   %s       %d      %d       %d         %s                        \n", j, produit[i].code, produit[i].nom, produit[i].prix, stock->historyAchat[j].quantite, stock->historyAchat[j].prixTotale, ctime(&stock->historyAchat[j].time));
+        int i = stock[k].historyAchat[j].nbrPro;
+        printf("\t\t\t||%d   %d   %s       %d      %d       %d         %d/%d/%d %d:%d:%d                        \n", j, produit[i].code, produit[i].nom, produit[i].prix, stock[k].historyAchat[j].quantite,stock[k].historyAchat[j].prixTotale,stock[k].historyAchat[j].jour,stock[k].historyAchat[j].mois,stock[k].historyAchat[j].annee,stock[k].historyAchat[j].heur,stock[k].historyAchat[j].minute,stock[k].historyAchat[j].seconde );
         printf("\t\t\t____________________________________________________________________________________\n");
+    }
     }
 }
 
@@ -264,33 +295,51 @@ void supprimerProduit(struct Produit produit[], int code)
 }
 
 // statitsique
-void totaleRevenuJournee(struct Stock *stock)
+void totaleRevenuJournee(struct Stock stock[])
 {
     printf("le revenu totale est :%d\n", stock->revenu);
 }
 // statitsique
 void moyenneRevenuJournee(struct Stock *stock)
 {
-    int sp = 0, sprixTotale = 0;
+    time_t tt = time(NULL);
+    struct tm* dt = localtime(&tt);
+    int sp = 0, sprixTotale = 0,positionStock=0,npa;
     float moyenne;
-    for (int i = 0; i < npa; i++)
+    for(int i=0;i<numeroJMY;i++){
+        npa=stock[i].nbrProduit;
+        if(stock[i].historyAchat[npa-1].jour==dt->tm_mday&&stock[i].historyAchat[npa-1].mois==dt->tm_mon+1&&stock[i].historyAchat[npa-1].annee==dt->tm_year+1900){
+            positionStock=i;
+            break;
+        }
+    }
+    for (int i = 0; i < stock[positionStock].nbrProduit; i++)
     {
-        sprixTotale += stock->historyAchat[i].prixTotale;
-        sp += stock->historyAchat[i].quantite;
+        sprixTotale += stock[positionStock].historyAchat[i].prixTotale;
+        sp += stock[positionStock].historyAchat[i].quantite;
     }
     moyenne = (float)sprixTotale / sp;
     printf("le max revenu est :%f\n", moyenne);
 }
 // statitsique
-void maxRevenuJournee(struct Stock *stock,struct Produit produit[])
+void maxRevenuJournee(struct Stock stock[],struct Produit produit[])
 {
-    int max = 0, position = 0,sprixTotale[100];
-    for (int i = 0; i < npa; i++)
+    time_t tt = time(NULL);
+    struct tm* dt = localtime(&tt);
+    int max = 0, position = 0,sprixTotale[100],npa,positionStock=0;
+    for(int i=0;i<numeroJMY;i++){
+        npa=stock[i].nbrProduit;
+        if(stock[i].historyAchat[npa-1].jour==dt->tm_mday&&stock[i].historyAchat[npa-1].mois==dt->tm_mon+1&&stock[i].historyAchat[npa-1].annee==dt->tm_year+1900){
+            positionStock=i;
+            break;
+        }
+    }
+    for (int i = 0; i < stock[positionStock].nbrProduit; i++)
     {   
-        sprixTotale[i]=stock->historyAchat[i].prixTotale;
-        for(int j=i+1;j<npa;i++){
-            if(produit[stock->historyAchat[i].nbrPro].code==produit[stock->historyAchat[j].nbrPro].code){
-                sprixTotale[i]+=stock->historyAchat[j].prixTotale;
+        sprixTotale[i]=stock[positionStock].historyAchat[i].prixTotale;
+        for(int j=i+1;j<stock[positionStock].nbrProduit;i++){
+            if(produit[stock[positionStock].historyAchat[i].nbrPro].code==produit[stock[positionStock].historyAchat[j].nbrPro].code){
+                sprixTotale[i]+=stock[positionStock].historyAchat[j].prixTotale;
             }
         } 
         if(sprixTotale[i]>max){
@@ -303,14 +352,23 @@ void maxRevenuJournee(struct Stock *stock,struct Produit produit[])
     printf("le meilleur niche avec un prix totale de  :%d est le produit avec le code %d et le nom %s\n", max,produit[stock->historyAchat[position].nbrPro].code,produit[stock->historyAchat[position].nbrPro].nom);
 }
 // statitsique
-void minRevenuJournee(struct Stock *stock,struct Produit produit[])
+void minRevenuJournee(struct Stock stock[],struct Produit produit[])
 {
-    int min = 0, position = 0,sprixTotale[100];
-    for (int i = 0; i < npa; i++)
-    {  sprixTotale[i]=stock->historyAchat[i].prixTotale;
+    time_t tt = time(NULL);
+    struct tm* dt = localtime(&tt);
+    int min = 0, position = 0,sprixTotale[100],npa,positionStock=0;
+    for(int i=0;i<numeroJMY;i++){
+        npa=stock[i].nbrProduit;
+        if(stock[i].historyAchat[npa-1].jour==dt->tm_mday&&stock[i].historyAchat[npa-1].mois==dt->tm_mon+1&&stock[i].historyAchat[npa-1].annee==dt->tm_year+1900){
+            positionStock=i;
+            break;
+        }
+    }
+    for (int i = 0; i < stock[positionStock].nbrProduit; i++)
+    {  sprixTotale[i]=stock[positionStock].historyAchat[i].prixTotale;
         for(int j=i+1;j<npa;i++){
-            if(produit[stock->historyAchat[i].nbrPro].code==produit[stock->historyAchat[j].nbrPro].code){
-                sprixTotale[i]+=stock->historyAchat[j].prixTotale;
+            if(produit[stock[positionStock].historyAchat[i].nbrPro].code==produit[stock[positionStock].historyAchat[j].nbrPro].code){
+                sprixTotale[i]+=stock[positionStock].historyAchat[j].prixTotale;
             }
         }   
       if(sprixTotale[i]<min){
@@ -321,7 +379,7 @@ void minRevenuJournee(struct Stock *stock,struct Produit produit[])
     printf("le meilleur niche avec un prix totale de  :%d est le produit avec le code %d et le nom %s\n", min,produit[stock->historyAchat[position].nbrPro].code,produit[stock->historyAchat[position].nbrPro].nom);
 }
 // fonction de display de menu
-void Menu(struct Produit produit[100], struct Stock *stock)
+void Menu(struct Produit produit[], struct Stock stock[])
 {
     int choix, nbr, codeProduit;
     do
@@ -452,6 +510,6 @@ void Menu(struct Produit produit[100], struct Stock *stock)
 int main()
 {
     struct Produit produit[100];
-    struct Stock stock;
-    Menu(produit, &stock);
+    struct Stock stock[100];
+    Menu(produit, stock);
 }
