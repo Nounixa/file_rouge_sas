@@ -282,43 +282,64 @@ void moyenneRevenuJournee(struct Stock *stock)
     printf("le max revenu est :%f\n", moyenne);
 }
 // statitsique
-void maxRevenuJournee(struct Stock *stock,struct Produit produit[])
+void maxRevenuJournee(struct Stock *stock, struct Produit produit[])
 {
-    int max = 0, position = 0,sprixTotale[100];
+    // , sprixTotale[100];
+    int max = 0, position = 0;
     for (int i = 0; i < npa; i++)
-    {   
-        sprixTotale[i]=stock->historyAchat[i].prixTotale;
-        for(int j=i+1;j<npa;i++){
-            if(produit[stock->historyAchat[i].nbrPro].code==produit[stock->historyAchat[j].nbrPro].code){
-                sprixTotale[i]+=stock->historyAchat[j].prixTotale;
-            }
-        } 
-        if(sprixTotale[i]>max){
-            max=sprixTotale[i];
-            position=i;
+    {
+        // sprixTotale[i] = stock->historyAchat[i].prixTotale;
+        // for (int j = 0; j < npa; i++)
+        // {
+        //     if (produit[stock->historyAchat[i].nbrPro].code == produit[stock->historyAchat[j].nbrPro].code)
+        //     {
+        //         sprixTotale[i] += stock->historyAchat[j].prixTotale;
+        //     }
+        // }
+        // if (sprixTotale[i] > max)
+        // {
+        //     max = sprixTotale[i];
+        //     position = i;
+        // }
+    if (stock->historyAchat[i].prixTotale > max)
+        {
+            max = stock->historyAchat[i].prixTotale ;
+            position = i;
         }
-          
+
     }
 
-    printf("le meilleur niche avec un prix totale de  :%d est le produit avec le code %d et le nom %s\n", max,produit[stock->historyAchat[position].nbrPro].code,produit[stock->historyAchat[position].nbrPro].nom);
+    printf("le meilleur niche avec un prix totale de  :%d est le produit avec le code %d et le nom %s\n", max, produit[stock->historyAchat[position].nbrPro].code, produit[stock->historyAchat[position].nbrPro].nom);
 }
 // statitsique
-void minRevenuJournee(struct Stock *stock,struct Produit produit[])
-{
-    int min = 0, position = 0,sprixTotale[100];
+void minRevenuJournee(struct Stock *stock, struct Produit produit[])
+{   
+    // , sprixTotale[100]
+    int min = 0, position = 0;
     for (int i = 0; i < npa; i++)
-    {  sprixTotale[i]=stock->historyAchat[i].prixTotale;
-        for(int j=i+1;j<npa;i++){
-            if(produit[stock->historyAchat[i].nbrPro].code==produit[stock->historyAchat[j].nbrPro].code){
-                sprixTotale[i]+=stock->historyAchat[j].prixTotale;
-            }
-        }   
-      if(sprixTotale[i]<min){
-            min=sprixTotale[i];
-            position=i;
+    {
+        // sprixTotale[i] = stock->historyAchat[i].prixTotale;
+        // for (int j = 0; j < npa; i++)
+        // {
+        //     if (produit[stock->historyAchat[i].nbrPro].code == produit[stock->historyAchat[j].nbrPro].code)
+        //     {
+        //         sprixTotale[i] += stock->historyAchat[j].prixTotale;
+        //     }
+        // }
+
+        // if (sprixTotale[i] < min)
+        // {
+        //     min = sprixTotale[i];
+        //     position = i;
+        // }
+
+                if (stock->historyAchat[i].prixTotale < min)
+        {
+            min = stock->historyAchat[i].prixTotale ;
+            position = i;
         }
     }
-    printf("le meilleur niche avec un prix totale de  :%d est le produit avec le code %d et le nom %s\n", min,produit[stock->historyAchat[position].nbrPro].code,produit[stock->historyAchat[position].nbrPro].nom);
+    printf("le meilleur niche avec un prix totale de  :%d est le produit avec le code %d et le nom %s\n", min, produit[stock->historyAchat[position].nbrPro].code, produit[stock->historyAchat[position].nbrPro].nom);
 }
 // fonction de display de menu
 void Menu(struct Produit produit[100], struct Stock *stock)

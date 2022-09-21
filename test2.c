@@ -33,7 +33,7 @@ void printDecor()
     system("cls");
     system("COLOR 7B");
     printf("\t \t*******************************************************************\n");
-    printf("\t\t =====================# Gestion de Pharmacie #===================== \n");
+    printf("\t\t========================gestion de pharmacie========================\n");
     printf("\t \t*******************************************************************\n");
     printf("\n \n \n \n \n");
 }
@@ -65,20 +65,24 @@ void ajouterUnProduit(struct Produit produit[])
     scanf("%d", &code);
     int i = recherche(code, produit);
     if (i == -1)
-    {   if(code>0){
-        produit[n].code = code;
-        fflush(stdin);
-        printf("ajouter le nom de produit :\n");
-        scanf("%[^\n]%*c", produit[n].nom);
-        fflush(stdin);
-        printf("ajouter le prix de produit:\n");
-        scanf("%d", &produit[n].prix);
-        printf("ajouter la quantite de produit:\n");
-        scanf("%d", &produit[n].quantite);
-        produit[n].TTC = produit[n].prix * 0.15 + produit[n].prix;
-        printf("le prix TTC est %d\n", produit[n].TTC);
-        n++;
-        }else{
+    {
+        if (code > 0)
+        {
+            produit[n].code = code;
+            fflush(stdin);
+            printf("ajouter le nom de produit :\n");
+            scanf("%[^\n]%*c", produit[n].nom);
+            fflush(stdin);
+            printf("ajouter le prix de produit:\n");
+            scanf("%d", &produit[n].prix);
+            printf("ajouter la quantite de produit:\n");
+            scanf("%d", &produit[n].quantite);
+            produit[n].TTC = produit[n].prix * 0.15 + produit[n].prix;
+            printf("le prix TTC est %d\n", produit[n].TTC);
+            n++;
+        }
+        else
+        {
             printf("veuille entrer un code qui ne contient pas - ");
         }
     }
@@ -109,8 +113,8 @@ void triProduitsAlphabetique(struct Produit produit[])
     for (int i = 0; i < n - 1; i++)
     {
         for (int j = i + 1; j < n; j++)
-        {                                                                                                                                                  
-            if (strcmp(produit[i].nom, produit[j].nom) > 0)
+        {
+            if (strcmp(produit[i].nom, produit[j].nom) < 0)
             {
                 p = produit[i];
                 produit[i] = produit[j];
@@ -180,23 +184,26 @@ void acheterProduit(struct Produit produit[], struct Stock *stock, int code)
             case 1:
                 printf("enter la quantite que vous voulez\n");
                 scanf("%d", &quantite);
-                if(quantite<=0){
-                printf("veuille entrer un nombre positive qui est different de 0\n");
-                }else{
-                if (produit[i].quantite >= quantite)
+                if (quantite <= 0)
                 {
-                    produit[i].quantite -= quantite;
-                    stock->revenu += produit[i].TTC * quantite;
-                    stock->historyAchat[npa].time = timeV;
-                    stock->historyAchat[npa].nbrPro = i;
-                    stock->historyAchat[npa].quantite = quantite;
-                    stock->historyAchat[npa].prixTotale = produit[i].TTC * quantite;
-                    npa++;
+                    printf("veuille entrer un nombre positive qui est different de 0\n");
                 }
                 else
                 {
-                    printf("la quantite que vous avez demander est superieur de se qu'on a dans le stock :%d\n", produit[i].quantite);
-                }
+                    if (produit[i].quantite >= quantite)
+                    {
+                        produit[i].quantite -= quantite;
+                        stock->revenu += produit[i].TTC * quantite;
+                        stock->historyAchat[npa].time = timeV;
+                        stock->historyAchat[npa].nbrPro = i;
+                        stock->historyAchat[npa].quantite = quantite;
+                        stock->historyAchat[npa].prixTotale = produit[i].TTC * quantite;
+                        npa++;
+                    }
+                    else
+                    {
+                        printf("la quantite que vous avez demander est superieur de se qu'on a dans le stock :%d\n", produit[i].quantite);
+                    }
                 }
                 break;
             case 0:
@@ -278,53 +285,85 @@ void moyenneRevenuJournee(struct Stock *stock)
         sp += stock->historyAchat[i].quantite;
     }
     moyenne = (float)sprixTotale / sp;
-    printf("le max revenu est :%f\n", moyenne);
+    printf("le moyenne revenu est :%f\n", moyenne);
 }
 // statitsique
-void maxRevenuJournee(struct Stock *stock,struct Produit produit[])
+void maxRevenuJournee(struct Stock *stock, struct Produit produit[])
 {
-    int max = 0, position = 0,sprixTotale[100];
+    // [100];
+    int max = 0, position = 0, sprixTotale;
     for (int i = 0; i < npa; i++)
-    {   
-        sprixTotale[i]=stock->historyAchat[i].prixTotale;
-        for(int j=i+1;j<npa;i++){
-            if(produit[stock->historyAchat[i].nbrPro].code==produit[stock->historyAchat[j].nbrPro].code){
-                sprixTotale[i]+=stock->historyAchat[j].prixTotale;
+    {
+        sprixTotale = stock->historyAchat[i].prixTotale;
+        for (int j = 0; j < npa; i++)
+        {
+            if (produit[stock->historyAchat[i].nbrPro].code == produit[stock->historyAchat[j].nbrPro].code)
+            {
+                sprixTotale += stock->historyAchat[j].prixTotale;
             }
-        } 
-        if(sprixTotale[i]>max){
-            max=sprixTotale[i];
-            position=i;
         }
-          
+        if (sprixTotale > max)
+        {
+            max = sprixTotale;
+            position = i;
+        }
     }
 
-    printf("le meilleur niche avec un prix totale de  :%d est le produit avec le code %d et le nom %s\n", max,produit[stock->historyAchat[position].nbrPro].code,produit[stock->historyAchat[position].nbrPro].nom);
+    printf("le meilleur niche avec un prix totale de  :%d est le produit avec le code %d et le nom %s\n", max, produit[stock->historyAchat[position].nbrPro].code, produit[stock->historyAchat[position].nbrPro].nom);
 }
 // statitsique
-void minRevenuJournee(struct Stock *stock,struct Produit produit[])
+void minRevenuJournee(struct Stock *stock, struct Produit produit[])
 {
-    int min = 0, position = 0,sprixTotale[100];
+
+    int min = 0, position = 0, sprixTotale;
     for (int i = 0; i < npa; i++)
-    {  sprixTotale[i]=stock->historyAchat[i].prixTotale;
-        for(int j=i+1;j<npa;i++){
-            if(produit[stock->historyAchat[i].nbrPro].code==produit[stock->historyAchat[j].nbrPro].code){
-                sprixTotale[i]+=stock->historyAchat[j].prixTotale;
+    {
+        sprixTotale = stock->historyAchat[i].prixTotale;
+        for (int j = 0; j < npa; i++)
+        {
+            if (produit[stock->historyAchat[i].nbrPro].code == produit[stock->historyAchat[j].nbrPro].code)
+            {
+                sprixTotale += stock->historyAchat[j].prixTotale;
             }
-        }   
-      if(sprixTotale[i]<min){
-            min=sprixTotale[i];
-            position=i;
+        }
+
+        if (sprixTotale < min)
+        {
+            min = sprixTotale;
+            position = i;
         }
     }
-    printf("le meilleur niche avec un prix totale de  :%d est le produit avec le code %d et le nom %s\n", min,produit[stock->historyAchat[position].nbrPro].code,produit[stock->historyAchat[position].nbrPro].nom);
+    printf("le meilleur niche avec un prix totale de  :%d est le produit avec le code %d et le nom %s\n", min, produit[stock->historyAchat[position].nbrPro].code, produit[stock->historyAchat[position].nbrPro].nom);
+}
+
+// etat de stock
+void etatStock(struct Produit produit[])
+{
+    printf("\t\t\t|code   |nom      |quantite    |prix");
+    printf("\t\t\t||_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _||\n");
+    for (int i = 0; i < n; i++)
+    {
+        if (produit[i].quantite < 3)
+        {
+            printf("\t\t\t|| %d   %d       %s          %d       %d       %d           ||\n", i + 1, produit[i].code, produit[i].nom, produit[i].prix, produit[i].quantite, produit[i].TTC);
+            printf("\t\t\t__________________________________________________________________\n");
+        }
+    }
 }
 // fonction de display de menu
 void Menu(struct Produit produit[100], struct Stock *stock)
 {
     int choix, nbr, codeProduit;
+    system("COLOR 0A");
+    printf("\n\n");
+    printf("\t\t\t                               _|                                              \n");
+    printf("\t\t\t _|      _|      _|    _|_|    _|    _|_|_|    _|_|    _|_|_|  _|_|      _|_|  \n");
+    printf("\t\t\t _|      _|      _|  _|_|_|_|  _|  _|        _|    _|  _|    _|    _|  _|_|_|_|\n");
+    printf("\t\t\t   _|  _|  _|  _|    _|        _|  _|        _|    _|  _|    _|    _|  _|      \n");
+    printf("\t\t\t    _|      _|        _|_|_|  _|    _|_|_|    _|_|    _|    _|    _|    _|_|_|\n");
+    printf("\n\n\n\n");
     do
-    {  
+    {
 
         printf("\t\t\t************************************************************************************\n");
         printf("\t\t\t____________________________________________________________________________________\n");
@@ -346,11 +385,15 @@ void Menu(struct Produit produit[100], struct Stock *stock)
         printf("\t\t\t____________________________________________________________________________________\n");
         printf("\t\t\t|afficher le totale de prix des produits vendus en journee courante entrer 9        |\n");
         printf("\t\t\t____________________________________________________________________________________\n");
-        printf("\t\t\t|afficher la moyenne de prix des produits vendus en journee courante entrer 10      |\n");
+        printf("\t\t\t|afficher l'etat de stock  entrer 10                                                |\n");
         printf("\t\t\t____________________________________________________________________________________\n");
-        printf("\t\t\t|afficher le max de prix des produits vendus en journee courante entrer 11          |\n");
+        printf("\t\t\t|recherche par quantite  entrer 11                                                 |\n");
         printf("\t\t\t____________________________________________________________________________________\n");
-        printf("\t\t\t|afficher le min de prix des produits vendus en journee courante entrer 12          |\n");
+        printf("\t\t\t|afficher la moyenne de prix des produits vendus en journee courante entrer 12      |\n");
+        printf("\t\t\t____________________________________________________________________________________\n");
+        printf("\t\t\t|afficher le max de prix des produits vendus en journee courante entrer 13         |\n");
+        printf("\t\t\t____________________________________________________________________________________\n");
+        printf("\t\t\t|afficher le min de prix des produits vendus en journee courante entrer 14          |\n");
         printf("\t\t\t____________________________________________________________________________________\n");
         printf("\t\t\t|entrer un nombre de votre choix et si vous voulez sortir du programme entrer 0     |\n");
         printf("\t\t\t____________________________________________________________________________________\n");
@@ -427,25 +470,38 @@ void Menu(struct Produit produit[100], struct Stock *stock)
             break;
         case 10:
             printDecor();
-            moyenneRevenuJournee(stock);
+            etatStock(produit);
             break;
         case 11:
             printDecor();
-            maxRevenuJournee(stock,produit);
+            printf("entrer la quantite\n");
+            scanf("%d", &nbr);
+            rechercheQuantite(nbr, produit);
             break;
         case 12:
             printDecor();
-            minRevenuJournee(stock,produit);
+            moyenneRevenuJournee(stock);
             break;
+
         case 13:
+            printDecor();
+            maxRevenuJournee(stock, produit);
+            break;
+        case 14:
+
+            printDecor();
+            minRevenuJournee(stock, produit);
+            break;
+        case 15:
             printDecor();
             affichageAchat(stock, produit);
             break;
+
         default:
             printf("s'il vous plait entrer un nombre entre 1 et 12");
             break;
         }
-         system("pause");
+        system("pause");
     } while (choix != 0);
 }
 int main()
